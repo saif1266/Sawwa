@@ -71,9 +71,9 @@ module.exports = {
       const response = await axios.get(`https://nyx-hub.vercel.app/album-list`);
       const categories = response.data;
       const message =
-        "𓂀 𝗔𝘃𝗮𝗶𝗹𝗮𝗯𝗹𝗲 𝗰𝗮𝘁𝗲𝗴𝗼𝗿𝗶𝗲𝘀:\n\n" +
+        "🎀 𝗔𝘃𝗮𝗶𝗹𝗮𝗯𝗹𝗲 𝗰𝗮𝘁𝗲𝗴𝗼𝗿𝗶𝗲𝘀 🎀\n\n" +
         categories.map((cat, index) => `${index + 1}. ${cat.category} (${cat.total_videos} videos)`).join("\n") +
-        "\n\n✈︎Fonts for Android and iPhone  - www.fontskeyboard.com/share-now Reply with number to select";
+        "\n\n✈︎Reply with number to select";
       
       await api.sendMessage(message, event.threadID, (error, info) => {
         global.GoatBot.onReply.set(info.messageID, {
@@ -118,3 +118,4 @@ module.exports = {
     }
   }
 };
+          
