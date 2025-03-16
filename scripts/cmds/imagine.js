@@ -1,60 +1,59 @@
-const axios = require("axios");
-
-const gApi = async () => {
-  const base = await axios.get(
-    "https://raw.githubusercontent.com/nazrul4x/Noobs/main/Apis.json"
-  );
-  return base.data.api;
-};
-
-module.exports.config = {
-  name: "imagine",
-  aliases: ["img", "c"],
-  version: "1.6.9",
-  author: "Nazrul",
-  role: 0,
-  description: "Generate unique images",
-  category: "image",
-  countDown: 3,
-  guide: {
-    en: "{pn} write a prompt",
+module.exports = {
+  config: {
+    name: "imagine",
+    aliases:[""],
+    version: "1.0",
+    author: "♡︎ 𝐻𝑎𝑠𝑎𝑛 ♡︎",
+    countDown: 3, 
+    role: 0,
+    longDescription: {
+      vi: "",
+      en: "Get image from your provided prompt",
+    },
+    category: "image",
+    guide: {
+      vi: "",
+      en: "{pn} prompt to generate image with flux-schnell ai",
+    },
   },
-};
 
-module.exports.onStart = async ({ api, event, args }) => {
-  const { threadID, messageID } = event;
-  const prompt = args.join(" ");
-  
-  if (!prompt) {
-    return api.sendMessage("⚠️ Please provide a prompt!", threadID, messageID);
-  }
-
-  try {
-    const apiUrl = await gApi();
-    const res = await axios.get(`${apiUrl}/nazrul/imagine?prompt=${encodeURIComponent(prompt)}`);
-    const { images } = res.data;
-
-    const attachments = [];
-    for (const image of images) {
-      if (image.imgUrl) {
-        const imageStream = await axios.get(image.imgUrl, { responseType: "stream" });
-        attachments.push(imageStream.data);
+  onStart: async function ({ api, args, message, event }) {
+    try {
+      const text = args.join(" ");
+      if (!text) {
+        return message.reply("Please provide a prompt.");
       }
-    }
 
-    api.sendMessage(
-      {
-        body: `🛠️ Here's your Generated Images \n\n🔖 Prompt: "${prompt}"`,
-        attachment: attachments,
-      },
-      threadID,
-      messageID
-    );
-  } catch (error) {
-    await api.sendMessage(
-      `❌ Oops! An error occurred while generating the image:\n${error.message}`,
-      threadID,
-      messageID
-    );
-  }
+      let prompt = text;
+
+      
+      const waitingMessage = await message.reply("✨ | creating your imagination...");
+      api.setMessageReaction("⏱️", event.messageID, () => {}, true);
+      const startTime = new Date().getTime();
+
+
+      const a = global.GoatBot.config.api.hasan;
+      const API = `${a}/imagine?prompt=${encodeURIComponent(prompt)}`;
+
+      
+      const imageStream = await global.utils.getStreamFromURL(API);
+      const endTime = new Date().getTime();
+      const timeTaken = (endTime - startTime) / 1000;
+
+      
+      await message.reply({
+        body: `Here is your generated image\n\n📝𝗽𝗿𝗼𝗺𝗽𝘁: ${prompt}\n⏱️𝗧𝗮𝗸𝗲𝗻 𝗧𝗶𝗺𝗲: ${timeTaken} second`,
+        attachment: imageStream,
+      });
+
+      api.setMessageReaction("✅", event.messageID, () => {}, true);
+
+      
+      await api.unsendMessage(waitingMessage.messageID);
+
+    } catch (error) {
+      console.log(error);
+      message.reply("Failed to generate the image. Please try again later.");
+    }
+  },
 };
